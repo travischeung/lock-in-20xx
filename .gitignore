@@ -1,4 +1,4 @@
-# Angular specific
+# Build output
 /dist/
 /out-tsc/
 /tmp/

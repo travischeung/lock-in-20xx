@@ -1,0 +1,175 @@
+# Cursor Rules for lock-in-20xx
+
+## Project Overview
+This is a Node.js Express.js application with TypeScript and a layered architecture. All code uses TypeScript with ES modules and maintains clear separation of concerns.
+
+## Module System
+- **Always use ES modules** (`import` and `export`), never CommonJS (require/module.exports)
+- Use `import` for all dependencies
+- Export using `export default` or named exports (`export { ... }`)
+- Example: `import express, { Request, Response, NextFunction } from 'express';`
+- TypeScript compiles to CommonJS via tsconfig.json, but source code uses ES modules
+
+## TypeScript Configuration
+- **TypeScript is configured with strict mode enabled** in `tsconfig.json`
+- All TypeScript files should be in `src/` directory
+- Compiled JavaScript output goes to `dist/` directory
+- Use TypeScript types and interfaces throughout the codebase
+- Never use `any` type unless absolutely necessary (prefer `unknown` or proper types)
+
+## Project Structure & Architecture
+
+### Layered Architecture Pattern
+Follow the three-layer architecture strictly:
+
+1. **Routes Layer** (`src/api/`)
+   - Handle HTTP requests and responses
+   - Use Express types: `Request`, `Response`, `NextFunction`
+   - Delegate business logic to services
+   - Use Express Router with proper typing
+   - File naming: `*.routes.ts`
+   - Example: `src/api/example.routes.ts`
+
+2. **Services Layer** (`src/services/`)
+   - Contains business logic and validation
+   - Call data layer functions
+   - Use TypeScript interfaces/types for data structures
+   - Do NOT make direct HTTP requests or database calls
+   - File naming: `*.service.ts`
+   - Example: `src/services/example.service.ts`
+
+3. **Data Layer** (`src/data/`)
+   - Handles data access operations
+   - Interacts with databases or data sources
+   - Use TypeScript types for data structures
+   - File naming: `*.data.ts`
+   - Example: `src/data/example.data.ts`
+
+### Directory Organization
+- `src/api/` - Route handlers and route registration
+- `src/services/` - Business logic layer
+- `src/data/` - Data access layer
+- `src/config/` - Configuration files with TypeScript interfaces
+- `src/util/` - Utility functions
+- `src/types/` - Type definitions and interfaces (e.g., `src/types/index.ts`)
+
+## Code Style & Patterns
+
+### TypeScript Types
+- **Always use explicit types** for function parameters and return values
+- Define interfaces/types in `src/types/index.ts` for shared types
+- Use Express types: `Request`, `Response`, `NextFunction`, `Router`
+- Example:
+  ```typescript
+  async function getById(id: string): Promise<ExampleItem | null> {
+    return await exampleData.findById(id);
+  }
+  ```
+
+### Error Handling
+- **Always use try/catch blocks** in route handlers
+- Pass errors to Express error handler using `next(error)`
+- Never swallow errors silently
+- Type error handlers properly
+- Example:
+  ```typescript
+  router.get('/', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const items = await exampleService.getAll();
+      res.json(items);
+    } catch (error) {
+      next(error);
+    }
+  });
+  ```
+
+### Async/Await
+- Use `async/await` consistently, avoid callback patterns
+- All route handlers should be async functions
+- Use `Promise<T>` return types explicitly
+- Service functions should be async when dealing with data operations
+- Example: `async function getAll(): Promise<ExampleItem[]>`
+
+### Documentation
+- **Use JSDoc comments** for all functions, routes, and modules
+- Include parameter types and return types in JSDoc (though TypeScript types are primary)
+- Document route endpoints with HTTP method and path
+- Example:
+  ```typescript
+  /**
+   * GET /api/example/:id
+   * Retrieves a single example item by ID
+   * @param {string} id - The item ID
+   * @returns {Promise<ExampleItem | null>} The item or null if not found
+   */
+  async function getById(id: string): Promise<ExampleItem | null>
+  ```
+
+### Express.js Patterns
+- Use Express Router for route definitions with proper typing: `const router: Router = express.Router();`
+- Mount routes in `src/api/index.ts`
+- Use standard REST conventions (GET, POST, PUT, DELETE)
+- Return appropriate HTTP status codes:
+  - 200 for successful GET/PUT
+  - 201 for successful POST
+  - 204 for successful DELETE
+  - 404 for not found
+  - 500 for server errors
+
+### Middleware
+- Configure middleware in `src/index.ts`
+- Use standard Express middleware (express.json, cors, etc.)
+- Type middleware functions properly with `Request`, `Response`, `NextFunction`
+- Keep middleware setup clear and documented
+
+## Naming Conventions
+- Route files: `*.routes.ts` (e.g., `example.routes.ts`)
+- Service files: `*.service.ts` (e.g., `example.service.ts`)
+- Data files: `*.data.ts` (e.g., `example.data.ts`)
+- Type/Interface files: `*.types.ts` or `types/index.ts`
+- Use camelCase for variable and function names
+- Use PascalCase for interfaces, types, and classes
+- Use descriptive names that indicate purpose
+
+## Code Organization
+- **Maintain clear separation of concerns** between layers
+- Routes should only handle HTTP concerns
+- Services should contain business logic
+- Data layer should only handle data access
+- Do not mix responsibilities across layers
+- Define shared types/interfaces in `src/types/index.ts`
+
+## Best Practices
+- Keep functions focused and single-purpose
+- Add validation in the service layer, not routes
+- Use consistent error handling patterns
+- Follow existing code patterns in the codebase
+- Write code that is easy to read and maintain
+- Prefer explicit types over `any`
+- Use interfaces for object shapes
+- Use type unions (`|`) for nullable types (e.g., `Promise<Item | null>`)
+
+## Configuration
+- Use `src/config/index.ts` for centralized configuration
+- Define configuration interfaces for type safety
+- Access environment variables through the config module
+- Never hardcode configuration values
+
+## Validation & Zod Rules
+
+### Schema Definitions
+- **All schemas live in** `src/util/schemas.ts` (or create if it doesn't exist).
+- Always use the `Schema` suffix for exports (e.g., `NutritionSchema`, `WorkoutSchema`).
+- Use Zod's `.strict()` by default to prevent extra properties from being injected.
+- Example:
+  ```typescript
+  import { z } from 'zod';
+  
+  export const WorkoutSchema = z.object({
+    name: z.string(),
+    sets: z.number().int().positive()
+  }).strict();
+  
+  // Infer TypeScript types from Zod schemas
+  export type Workout = z.infer<typeof WorkoutSchema>;
+  ```
