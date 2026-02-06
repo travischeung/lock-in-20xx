@@ -2,8 +2,7 @@ import 'dotenv/config';
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import config from './config';
-import exampleRoutes from './api/example.routes'
-
+import promptsRoutes from './routes/prompts';
 const app = express();
 
 /**
@@ -19,7 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 /**
  * Mount API routes
  */
-app.use('/api', exampleRoutes);
+app.use('/api', promptsRoutes);
 
 /**
  * Health check endpoint

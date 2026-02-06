@@ -83,8 +83,31 @@ export const ExerciseEntrySchema = z
   .strict();
 
 /**
+ * Ask-coach request body (e.g. POST /api/agentGatsby/ask-coach)
+ */
+export const AskCoachRequestSchema = z
+  .object({
+    message: z.string().min(1, 'Message is required'),
+  })
+  .strict();
+
+/**
+ * Structured coach response for DB storage and parsing.
+ * Use this when the agent is instructed to return JSON in this shape.
+ */
+export const CoachStructuredResponseSchema = z
+  .object({
+    summary: z.string(),
+    actionItems: z.array(z.string()),
+    rawResponse: z.string().optional(), // full prose for display
+  })
+  .strict();
+
+/**
  * Inferred TypeScript types from Zod schemas
  */
+export type AskCoachRequest = z.infer<typeof AskCoachRequestSchema>;
+export type CoachStructuredResponse = z.infer<typeof CoachStructuredResponseSchema>;
 export type Gender = z.infer<typeof GenderSchema>;
 export type ActivityLevel = z.infer<typeof ActivityLevelSchema>;
 export type Goal = z.infer<typeof GoalSchema>;

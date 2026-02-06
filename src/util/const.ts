@@ -100,6 +100,24 @@ const agentGatsbyInstructions = `
     Track user's program, progress, limitations, and individual response patterns to refine recommendations over time.
 `;
 
+/**
+ * When using structured output, append this to instructions so the agent returns valid JSON.
+ * Shape must match CoachStructuredResponseSchema in schemas.ts.
+ */
+const agentGatsbyStructuredResponseFormat = `
+    STRUCTURED RESPONSE FORMAT (when structured output is requested):
+    Reply with ONLY valid JSON, no markdown or extra text. Use this exact shape:
+    {
+      "summary": "1-2 sentence summary of your response",
+      "actionItems": ["action 1", "action 2", ...],
+      "rawResponse": "Full prose response for the user to read"
+    }
+`;
+
+const testPrompt = `test prompt`;
+
 export default {
-    agentGatsbyInstructions
-}
+    agentGatsbyInstructions,
+    agentGatsbyStructuredResponseFormat,
+    testPrompt
+};
